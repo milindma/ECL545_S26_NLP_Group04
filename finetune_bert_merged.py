@@ -42,12 +42,12 @@ DATASET_DIR   = os.path.join(_HERE, "data", "tokenized_dataset")
 OUTPUT_DIR    = os.path.join(_HERE, "models", "bert_base_finetuned")
 LOGGING_DIR   = os.path.join(_HERE, "logs", "bert_merged")
 
-LEARNING_RATE  = 5e-5       # higher LR: generic BERT needs gentler adaptation
+LEARNING_RATE  = 1e-5       # higher LR: generic BERT needs gentler adaptation
 NUM_EPOCHS     = 10         # more epochs to compensate for generic pre-training
 BATCH_SIZE     = 8          # halved to fit MPS unified memory on Apple M4
 GRAD_ACCUM     = 2          # accumulate 2 steps → effective batch = 16 (same as before)
 WEIGHT_DECAY   = 0.01
-WARMUP_RATIO   = 0.20
+WARMUP_RATIO   = 0.10
 EARLY_STOP_PAT = 3          # more patience to match longer training
 
 ID2LABEL = {0: "positive", 1: "negative", 2: "neutral"}
@@ -87,10 +87,6 @@ def load_model():
         label2id=LABEL2ID,
     )
     trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    
-     # Increase dropout for better generalization
-    model.config.hidden_dropout_prob = 0.3
-    model.config.attention_probs_dropout_prob = 0.3
     
     total     = sum(p.numel() for p in model.parameters())
     print(f"Parameters: {trainable:,} trainable / {total:,} total")
